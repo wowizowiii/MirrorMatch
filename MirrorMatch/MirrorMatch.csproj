@@ -1,0 +1,89 @@
+<!--
+    Deadly Trick Plugin Project
+
+    This template comes pre-configured with sensible defaults,
+    allowing modders to jump right into development for most tasks.
+-->
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Plugin Properties -->
+    <PropertyGroup>
+        <BepInExPluginName>MirrorMatch</BepInExPluginName>
+        <BepInExPluginGuid>AetharNet.Mods.DeadlyTrick.$(BepInExPluginName)</BepInExPluginGuid>
+        <Version>0.1.0</Version>
+    </PropertyGroup>
+
+    <!-- Assembly Properties -->
+    <PropertyGroup>
+        <!-- Main Properties -->
+        <AssemblyName>$(BepInExPluginName)</AssemblyName>
+        <RootNamespace>$(BepInExPluginGuid)</RootNamespace>
+        <!-- Know what you're doing and need more customization? Here you go! -->
+        <LangVersion>12</LangVersion>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <!-- These help make output cleaner -->
+        <DebugType Condition="'$(Configuration)' == 'Release'">none</DebugType>
+        <GenerateDependencyFile>false</GenerateDependencyFile>
+        <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    </PropertyGroup>
+
+    <!-- Automatic Install Detection -->
+    <PropertyGroup>
+        <!-- If no custom install location has been set, fallback to default Steam install location -->
+        <DeadlyTrick_Install_Location Condition="!Exists('$(DeadlyTrick_Install_Location)') AND $([MSBuild]::IsOSPlatform('Windows'))">$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Steam App 3088400', 'InstallLocation', null, RegistryView.Registry64, RegistryView.Registry32))</DeadlyTrick_Install_Location>
+        <DeadlyTrick_Install_Location Condition="!Exists('$(DeadlyTrick_Install_Location)') AND $([MSBuild]::IsOSPlatform('Windows'))">C:\Program Files (x86)\Steam\steamapps\common\DeadlyTrick</DeadlyTrick_Install_Location>
+        <DeadlyTrick_Install_Location Condition="!Exists('$(DeadlyTrick_Install_Location)') AND $([MSBuild]::IsOSPlatform('Linux'))">$(HOME)/.steam/steam/steamapps/common/DeadlyTrick</DeadlyTrick_Install_Location>
+        <!-- If no custom BepInEx location has been set, fallback to default game install location -->
+        <DeadlyTrick_BepInEx_Location Condition="'$(DeadlyTrick_BepInEx_Location)' == ''">$(DeadlyTrick_Install_Location)\BepInEx</DeadlyTrick_BepInEx_Location>
+        <!-- Shortcut for Game Assemblies -->
+        <_ManagedAssemblies>$(DeadlyTrick_Install_Location)\DeadlyTrick_Data\Managed</_ManagedAssemblies>
+    </PropertyGroup>
+
+    <!-- NuGet Packages -->
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all"/>
+        <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" PrivateAssets="all"/>
+        <PackageReference Include="HarmonyX" Version="2.9.0" PrivateAssets="all"/>
+        <PackageReference Include="UnityEngine.Modules" Version="6000.0.59" IncludeAssets="compile" PrivateAssets="all"/>
+    </ItemGroup>
+
+    <!-- Game Assemblies -->
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp" Private="false" Publicize="true">
+            <HintPath>$(_ManagedAssemblies)\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass" Private="false" Publicize="true">
+            <HintPath>$(_ManagedAssemblies)\Assembly-CSharp-firstpass.dll</HintPath>
+        </Reference>
+        <Reference Include="com.rlabrecque.steamworks.net" Private="false">
+            <HintPath>$(_ManagedAssemblies)\com.rlabrecque.steamworks.net.dll</HintPath>
+        </Reference>
+        <Reference Include="Google.Protobuf" Private="false">
+            <HintPath>$(_ManagedAssemblies)\Google.Protobuf.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro" Private="false">
+            <HintPath>$(_ManagedAssemblies)\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI" Private="false">
+            <HintPath>$(_ManagedAssemblies)\UnityEngine.UI.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <!-- Project Assets & Resources -->
+    <ItemGroup>
+        <Content Include="Assets\**" Condition="Exists('Assets')" CopyToOutputDirectory="PreserveNewest"/>
+        <EmbeddedResource Include="Resources\**" Condition="Exists('Resources')"/>
+    </ItemGroup>
+
+    <!-- Install plugin on build -->
+    <PropertyGroup Condition="Exists('$(DeadlyTrick_BepInEx_Location)')">
+        <OutputPath>$(DeadlyTrick_BepInEx_Location)\plugins\$(AssemblyName)\</OutputPath>
+    </PropertyGroup>
+
+</Project>
